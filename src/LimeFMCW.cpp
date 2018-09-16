@@ -147,24 +147,37 @@ uint8_t LimeFMCW::configTestSignal(lms_testsig_t pTestSignalOneType, lms_testsig
     return 0;
 }
 
-uint8_t LimeFMCW::setRFBandwidth(uint8_t pChannel, uint8_t pNum_channels, float pBandwidth){
-    pChannel = (pChannel == LIMEFMCW_CH_TX) ? LMS_CH_TX : LMS_CH_RX;
+uint8_t LimeFMCW::configSystemStream(uint8_t pNum_channels){
 
+    return 0;
+}
+
+uint8_t LimeFMCW::setRFBandwidth(uint8_t pNum_channels, float pBandwidth){
     cout << "NOTE: If the bandwidth value is out of bounds, it will be adjusted accordingly." << endl;
-
-    // Ensure that pBandwidth is not below the minimum bound
-    pBandwidth = ((pChannel == LMS_CH_TX) && (pBandwidth < this->bandwidth_range_tx.min) ? this->bandwidth_range_tx.min : pBandwidth);
-    pBandwidth = ((pChannel == LMS_CH_RX) && (pBandwidth < this->bandwidth_range_rx.min) ? this->bandwidth_range_rx.min : pBandwidth);
-
-    // Ensure that pBandwidth is not below the maximum bound
-    pBandwidth = (((pChannel == LMS_CH_TX) && (pBandwidth > this->bandwidth_range_tx.max)) ? this->bandwidth_range_tx.max : pBandwidth);
-    pBandwidth = (((pChannel == LMS_CH_RX) && (pBandwidth > this->bandwidth_range_rx.max)) ? this->bandwidth_range_rx.max : pBandwidth);
-    cout << "Setting bandwidth of "<< ((pChannel == LMS_CH_TX) ? "TX channel" : "RX channel") << " to -> "<< pBandwidth << endl;
+    
+    // Ensure that pBandwidth is not out of bounds
+#ifdef USE_LIMEFMCW_CH_TX
+    pBandwidth = ((pBandwidth > this->bandwidth_range_tx.max) ? this->bandwidth_range_tx.max : pBandwidth);
+    pBandwidth = ((pBandwidth < this->bandwidth_range_tx.min) ? this->bandwidth_range_tx.min : pBandwidth);
+    cout << "Setting bandwidth of TX channel to -> "<< pBandwidth << endl;
+#endif        
+#ifdef USE_LIMEFMCW_CH_RX
+    pBandwidth = ((pBandwidth > this->bandwidth_range_rx.max) ? this->bandwidth_range_rx.max : pBandwidth);
+    pBandwidth = ((pBandwidth < this->bandwidth_range_rx.min) ? this->bandwidth_range_rx.min : pBandwidth);
+    cout << "Setting bandwidth of RX channel to -> "<< pBandwidth << endl;
+#endif
     
     for (int channel_index = 0; channel_index < pNum_channels; channel_index++){
-        if(LMS_SetLPFBW(lime_device, pChannel, channel_index, pBandwidth) != 0){
+#ifdef USE_LIMEFMCW_CH_TX
+        if(LMS_SetLPFBW(lime_device, LMS_CH_TX, channel_index, pBandwidth) != 0){
             error();
         }
+#endif        
+#ifdef USE_LIMEFMCW_CH_RX
+        if(LMS_SetLPFBW(lime_device, LMS_CH_RX, channel_index, pBandwidth) != 0){
+            error();
+        }
+#endif
     }
     return 0;
 }

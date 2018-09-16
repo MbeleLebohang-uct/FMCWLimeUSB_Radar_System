@@ -27,9 +27,10 @@ float			frequency_center = 800e6;
 float			sampling_rate = 8e6;
 
 
-int main(int argc, char** argv) {   
+int main(int argc, char** argv) {  
+#ifdef	USE_LIMESDR 
 	cout << "Raptor Watch FMCW Radar System" << endl;
-
+#endif
 	cout << "Done" << endl;
 	return 0;
 }

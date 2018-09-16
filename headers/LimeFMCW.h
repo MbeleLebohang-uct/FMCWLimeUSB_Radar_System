@@ -21,6 +21,12 @@
 #define LIMEFMCW_CH_RX      1
 #define LIMEFMCW_CH_TX_RX   2
 
+// Uncomment one or both of this micros to use that path
+// #define USE_LIMEFMCW_CH_RX
+// #define USE_LIMEFMCW_CH_TX
+
+
+
 namespace MBLLEB006{
 
     class LimeFMCW {
@@ -57,13 +63,19 @@ namespace MBLLEB006{
         uint8_t configTestSignal(lms_testsig_t pTestSignalOneType, lms_testsig_t pTestSignalTwoType);
 
         /**
+         * @Brief Enable or disable the test signal
+         */
+        uint8_t configSystemStream(uint8_t pNum_channels);
+
+        /**
          * @Brief Set the bandwidth of a single channel at the time
-         * @param   pChannel - LIMEFMCW_CH_TX or LIMEFMCW_CH_RX
-         *          pNum_channels - Number of LimeUSB channels to enable in specfied channel. Max is 2
+         *        define USE_LIMEFMCW_CH_TX and USE_LIMEFMCW_CH_RX to set the bandwidth of that specific path
+         *
+         * @param   pNum_channels - Number of LimeUSB channels to enable in specfied channel. Max is 2
          *          pbandwidth - bandwidth value. Must not exceed the min-max of that channel
          *          
          */
-        uint8_t setRFBandwidth(uint8_t pChannel, uint8_t pNum_channels, float pBandwidth);
+        uint8_t setRFBandwidth(uint8_t pNum_channels, float pBandwidth);
 
         /**
          * @Brief Get the RX center frequency channel
