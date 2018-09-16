@@ -34,6 +34,28 @@ LimeFMCW::LimeFMCW(){
         error();
     }
     cout << "LimeSDR-USB device opened successfully." << endl;
+
+    if((n = LMS_GetNumChannels(lime_device, LMS_CH_RX)) < 0){
+        error();
+    }
+    cout << "Number of RX Channels: " << n << endl;
+
+    if((n = LMS_GetNumChannels(lime_device, LMS_CH_TX)) < 0){
+        error();
+    }
+    cout << "Number of TX Channels: " << n << endl;
+
+    
+    if(LMS_GetLPFBWRange(lime_device, LMS_CH_RX, &bandwidth_range_rx) != 0){
+        error();
+    }
+    cout << "RX bandwidth range: " << bandwidth_range_rx.min/(1e6)<<" - "<<bandwidth_range_rx.max/(1e6) <<"MHz"<< endl;
+
+    if(LMS_GetLPFBWRange(lime_device, LMS_CH_TX, &bandwidth_range_rx) != 0){
+        error();
+    }
+    cout << "TX bandwidth range: " << bandwidth_range_tx.min/(1e6)<<" - "<<bandwidth_range_tx.max/(1e6) <<"MHz"<< endl;
+
 }
 
 LimeFMCW::~LimeFMCW(){
@@ -43,8 +65,14 @@ LimeFMCW::~LimeFMCW(){
     }
 }
 
-uint8_t  LimeFMCW::LimeChannelConfig(bool Channel, float pFrequency_center,float pSampling_rate){
-    this->frequency_center = pFrequency_center;
+uint8_t  LimeFMCW::configLimeChannel(uint8_t pChannel, uint8_t pNum_channels, float pFrequency_center_rx, float pFrequency_center_tx, float pGain_rx, float pGain_tx,float pSampling_rate){
+    // Max number of channels on LimeUSB is 2
+    if(pNum_channels > 2){
+        pNum_channels = 2;
+    }
+
+    this->frequency_center_tx = pFrequency_center_tx;
+    this->frequency_center_rx = pFrequency_center_rx;
     this->sampling_rate = pSampling_rate;
 
     cout << "Initializing the Lime device..." << endl;
@@ -53,17 +81,55 @@ uint8_t  LimeFMCW::LimeChannelConfig(bool Channel, float pFrequency_center,float
     }
     cout << "Initialization complete!" << endl;
 
-    cout << "Setting center frequency to -> "<< this->frequency_center << endl;
-    if(LMS_EnableChannel(lime_device, Channel,0, true)){
-        error();
-    }
+    if((pChannel == LIMEFMCW_CH_TX) || (pChannel == LIMEFMCW_CH_RX)){
 
-    if(LMS_SetLOFrequency(lime_device, Channel,0, this->frequency_center)){
-        error();
+        pChannel = (pChannel == LIMEFMCW_CH_TX) ? LMS_CH_TX : LMS_CH_RX;
+
+        cout << "Setting center frequency to -> "<< ((pChannel == LMS_CH_TX) ? this->frequency_center_tx : this->frequency_center_rx) << endl;
+        for (int channel_index = 0; channel_index < pNum_channels; channel_index++){
+            if(LMS_EnableChannel(lime_device, pChannel,channel_index, true)){
+                error();
+            }
+
+            if(LMS_SetLOFrequency(lime_device, pChannel,channel_index, ((pChannel == LMS_CH_TX) ? this->frequency_center_tx : this->frequency_center_rx))){
+                error();
+            }
+
+            if(LMS_SetNormalizedGain(lime_device, pChannel,channel_index, pGain_rx)){
+                error();
+            }
+        }
+    }
+    else{
+        for (int channel_index = 0; channel_index < pNum_channels; channel_index++){
+            if(LMS_EnableChannel(lime_device, LMS_CH_RX,channel_index, true)){
+                error();
+            }
+            if(LMS_EnableChannel(lime_device, LMS_CH_TX,channel_index, true)){
+                error();
+            }
+
+            if(LMS_SetLOFrequency(lime_device, LMS_CH_RX,channel_index, frequency_center_rx)){
+                error();
+            }
+            if(LMS_SetLOFrequency(lime_device, LMS_CH_TX,channel_index, frequency_center_tx)){
+                error();
+            }
+
+            if(LMS_SetNormalizedGain(lime_device, LMS_CH_RX,channel_index, pGain_rx)){
+                error();
+            }
+            if(LMS_SetNormalizedGain(lime_device, LMS_CH_TX,channel_index, pGain_tx)){
+                error();
+            }
+        }
+        cout << "Enabling RX and TX complete..."<< endl;
+        cout << "Center frequency of RX is set to -> "<< this->frequency_center_rx << endl;
+        cout << "Center frequency of TX is set to -> "<< this->frequency_center_tx << endl;
     }
     
-    cout << "Setting sampling frequency to -> "<< this->sampling_rate << endl;
-    if(LMS_SetSampleRate(lime_device, this->sampling_rate,2)){
+    cout << "Setting Lime device sampling rate to -> "<< this->sampling_rate << endl;
+    if(LMS_SetSampleRate(lime_device, this->sampling_rate,4)){
         error();
     }
     cout << "Channel configuration is complete." << endl;
@@ -71,8 +137,45 @@ uint8_t  LimeFMCW::LimeChannelConfig(bool Channel, float pFrequency_center,float
     return 0;
 }
 
-float LimeFMCW::getCenterFrequency(){
-    return this->frequency_center;
+uint8_t LimeFMCW::configTestSignal(lms_testsig_t pTestSignalOneType, lms_testsig_t pTestSignalTwoType){
+    if(LMS_SetTestSignal(lime_device, LMS_CH_RX, 0, pTestSignalOneType, 0, 0) != 0){
+        error();
+    }
+    if(LMS_SetTestSignal(lime_device, LMS_CH_RX, 1, pTestSignalTwoType, 0, 0) != 0){
+        error();
+    }
+    return 0;
+}
+
+uint8_t LimeFMCW::setRFBandwidth(uint8_t pChannel, uint8_t pNum_channels, float pBandwidth){
+    pChannel = (pChannel == LIMEFMCW_CH_TX) ? LMS_CH_TX : LMS_CH_RX;
+
+    cout << "NOTE: If the bandwidth value is out of bounds, it will be adjusted accordingly." << endl;
+
+    // Ensure that pBandwidth is not below the minimum bound
+    pBandwidth = ((pChannel == LMS_CH_TX) && (pBandwidth < this->bandwidth_range_tx.min) ? this->bandwidth_range_tx.min : pBandwidth);
+    pBandwidth = ((pChannel == LMS_CH_RX) && (pBandwidth < this->bandwidth_range_rx.min) ? this->bandwidth_range_rx.min : pBandwidth);
+
+    // Ensure that pBandwidth is not below the maximum bound
+    pBandwidth = (((pChannel == LMS_CH_TX) && (pBandwidth > this->bandwidth_range_tx.max)) ? this->bandwidth_range_tx.max : pBandwidth);
+    pBandwidth = (((pChannel == LMS_CH_RX) && (pBandwidth > this->bandwidth_range_rx.max)) ? this->bandwidth_range_rx.max : pBandwidth);
+    cout << "Setting bandwidth of "<< ((pChannel == LMS_CH_TX) ? "TX channel" : "RX channel") << " to -> "<< pBandwidth << endl;
+    
+    for (int channel_index = 0; channel_index < pNum_channels; channel_index++){
+        if(LMS_SetLPFBW(lime_device, pChannel, channel_index, pBandwidth) != 0){
+            error();
+        }
+    }
+    return 0;
+}
+
+
+float LimeFMCW::getRXCenterFrequency(){
+    return this->frequency_center_rx;
+}
+
+float LimeFMCW::getTXCenterFrequency(){
+    return this->frequency_center_tx;
 }
 
 float LimeFMCW::getSamplingRate(){
