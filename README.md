@@ -1,5 +1,5 @@
-PP_Prac4
-NOTE: shrek_test.pgm is used for testing, therefore it may not be modified.
+## RaptorWatch
+FMCW radar system implemented in LimeSDR-USB for detection and tracking of birds.
 
 # Compile
 To compile the source code, run:
@@ -8,20 +8,19 @@ $make
 # Run
 To run the code, you have to compile it first. this will produce the huffencode executable which can be ran by:
 
-$./imageops <options>
+$./fmcwradar <options>
 
-for more information on <options>, read the PDF on this assignment. Please not that if incorrect options are
-given the program will abort.
+Please note that if incorrect options are given the program will abort.
 
 # Testing
 To compile the executable file for testing use:
 $make test 
 
 To run the tests use:
-$./imageopstest
+$./fmcwradartest
 
 if you want to see each asssertion results, add the -s flag:
-$./imageopstest -s
+$./fmcwradartest -s
 
 but this might results in slower test runs. :(
 

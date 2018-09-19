@@ -31,7 +31,7 @@
 
 // Uncomment one or both of this micros to use that path
 // #define USE_LIMEFMCW_CH_RX
-// #define USE_LIMEFMCW_CH_TX
+#define USE_LIMEFMCW_CH_TX
 
 
 
@@ -39,9 +39,10 @@ namespace MBLLEB006{
 
     class LimeFMCW {
     public:
-        /******** public variables *******/
+        /*************** public variables ************/
         lms_device_t* lime_device = NULL;
-        /*********************************/
+        bool          lime_device_running = false;
+        /*********************************************/
 
         /**
          * @Brief Default constructor
@@ -71,14 +72,43 @@ namespace MBLLEB006{
         uint8_t configTestSignal(lms_testsig_t pTestSignalOneType, lms_testsig_t pTestSignalTwoType);
 
         /**
-         * @Brief Enable or disable the test signal
+         * @Brief Configure the signal and start the stream
+         * @param pFIFOSize
+                  pThroughputVsLatency - look at limesuite.h for more info
+                  pF_start - The initial frequency to start transmitting from
+         *        pF_sweep  - Sweep frequency
+         *        pT_cpi  - coherent processing interval
          */
-        uint8_t configSystemStream(uint16_t pFIFOSize, float pThroughputVsLatency);
+        uint8_t configSystemStream(uint16_t pFIFOSize, float pThroughputVsLatency, float pF_start, float pF_sweep, float pT_cpi);
 
         /**
          * @Brief Start transmitting FMCW signal
          */
-        uint8_t startFMCWTransmit();
+        void startFMCWTransmit();
+
+        /**
+         * @Brief Pause transmitting FMCW signal
+         */
+        void pauseFMCWTransmit();
+
+        /**
+         * @Brief Resume transmitting FMCW signal
+         */
+        void resumeFMCWTransmit();
+
+        /**
+         * @Brief stop transmitting FMCW signal. This also closes the device for you.
+         */
+        void stopFMCWTransmit();
+
+        /**
+         * @Brief Generate a linear chirp signal
+         *
+         * @param f_start - The initial frequency to start transmitting from
+         *        f_sweep  - Sweep frequency
+         *        t_cpi  - coherent processing interval
+         */
+        void generateLinearChirpSignal(float pF_start, float pF_sweep, float pT_cpi);
 
         /**
          * @Brief Set the bandwidth of a single channel at the time
