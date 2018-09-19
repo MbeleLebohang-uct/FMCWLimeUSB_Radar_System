@@ -13,7 +13,7 @@ SOURCES = $(wildcard src/*.cpp)
 SOURCES_TEST = $(wildcard tests/*.cpp)
 OBJ = $(SOURCES:src/%.cpp=bin/%.o)
 OBJ_TEST = $(filter-out bin/main.o, $(OBJ)) $(SOURCES_TEST:tests/%.cpp=bin/%.o)
-LIBS = -lm $(wildcard /usr/local/lib/*.so)
+LIBS = -lm -lpthread $(wildcard /usr/local/lib/*.so)
 INC = -I headers
 INC_TEST = -I lib/catch/inc
 
