@@ -30,7 +30,7 @@
 #define TRANSMISSION_RECEIVE_TIME   10
 
 // Uncomment one or both of this micros to use that path
-// #define USE_LIMEFMCW_CH_RX
+//#define USE_LIMEFMCW_CH_RX
 #define USE_LIMEFMCW_CH_TX
 
 

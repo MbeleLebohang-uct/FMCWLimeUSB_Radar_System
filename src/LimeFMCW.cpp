@@ -151,11 +151,11 @@ uint8_t LimeFMCW::configSystemStream(uint16_t pFIFOSize, float pThroughputVsLate
 
     for (int channel_index = 0; channel_index < NUMBER_OF_CHANNELS; ++channel_index){
 #ifdef USE_LIMEFMCW_CH_TX
-        this->tx_streams.channel = channel_index;
-        this->tx_streams.fifoSize = pFIFOSize * pFIFOSize;
-        this->tx_streams.ThroughputVsLatency = pThroughputVsLatency;
-        this->tx_streams.isTX = false;
-        this->tx_streams.dataFmt = lms_stream_t::LMS_FMT_F32;
+        this->tx_streams->channel = channel_index;
+        this->tx_streams->fifoSize = pFIFOSize * pFIFOSize;
+        this->tx_streams->throughputVsLatency = pThroughputVsLatency;
+        this->tx_streams->isTx = false;
+        this->tx_streams->dataFmt = lms_stream_t::LMS_FMT_F32;
 
         if (LMS_SetupStream(this->lime_device, &this->tx_streams[channel_index])){
             error();
@@ -163,11 +163,11 @@ uint8_t LimeFMCW::configSystemStream(uint16_t pFIFOSize, float pThroughputVsLate
         cout << "TX Channels Streams has been setup successfully ..." << endl;
 #endif
 #ifdef USE_LIMEFMCW_CH_RX
-        this->rx_streams.channel = channel_index;
-        this->rx_streams.fifoSize = pFIFOSize * pFIFOSize;
-        this->rx_streams.ThroughputVsLatency = pThroughputVsLatency;
-        this->rx_streams.isTX = true;
-        this->rx_streams.dataFmt = lms_stream_t::LMS_FMT_F32;
+        this->rx_streams->channel = channel_index;
+        this->rx_streams->fifoSize = pFIFOSize * pFIFOSize;
+        this->rx_streams->throughputVsLatency = pThroughputVsLatency;
+        this->rx_streams->isTx = true;
+        this->rx_streams->dataFmt = lms_stream_t::LMS_FMT_F32;
 
         if (LMS_SetupStream(this->lime_device, &rx_streams[channel_index])){
             error();
@@ -181,7 +181,7 @@ uint8_t LimeFMCW::configSystemStream(uint16_t pFIFOSize, float pThroughputVsLate
     for (int channel_index = 0; channel_index < NUMBER_OF_CHANNELS; ++channel_index){
 #ifdef USE_LIMEFMCW_CH_TX
         // Fill the TX buffer with transmit IQ data
-       generateLinearChirpSignal(pF_start,pF_sweep,pT_cpi);
+        generateLinearChirpSignal(pF_start,pF_sweep,pT_cpi);
         LMS_StartStream(&this->tx_streams[channel_index]);
 #endif
 #ifdef USE_LIMEFMCW_CH_RX
@@ -225,8 +225,8 @@ void LimeFMCW::startFMCWTransmit(){
 
     // Print RF statistics
     if(chrono::high_resolution_clock::now() - t2 > chrono::seconds(1)){
-#ifdef USE_LIMEFMCW_CH_RX         
         lms_stream_status_t status;
+#ifdef USE_LIMEFMCW_CH_RX         
         LMS_GetStreamStatus(this->rx_streams,&status);
         cout << "RX rate: " << status.linkRate/(1e6) << "MB/s on all channels" << endl;
         cout << "RX 0 FIFO: " << 100*status.fifoFilledCount/status.fifoSize << "%" << endl;
@@ -297,7 +297,7 @@ void LimeFMCW::generateLinearChirpSignal(float f_start, float f_sweep, float t_c
 #endif
 }
 
-uint8_t LimeFMCW::setRFBandwidth(const float pBandwidth){
+uint8_t LimeFMCW::setRFBandwidth(float pBandwidth){
     cout << "NOTE: If the bandwidth value is out of bounds, it will be adjusted accordingly." << endl;
     
     // Ensure that pBandwidth is not out of bounds
