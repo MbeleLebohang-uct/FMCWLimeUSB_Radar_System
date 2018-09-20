@@ -31,11 +31,11 @@ bool running;
 const int tx_size = 1024*2;
 float tx_buffer[2*tx_size];
 double gain_tx = 1;
-float bandwidth = 50e6;
+float bandwidth = 100e6;
 
 float f_start = 10e6;
 float f_sweep = f_start + bandwidth;
-float t_cpi = 100;
+float t_cpi = 10;
 lms_range_t bandwidth_range_tx;
 
 int error()
@@ -104,26 +104,35 @@ int main(int argc, char** argv){
             error();
         }
 
-        if (LMS_SetLOFrequency(device,LMS_CH_TX, 0, 500e6)!=0){
+        if (LMS_SetLOFrequency(device,LMS_CH_TX, 0, 2400e6)!=0){
+            error();
+        }
+        if(LMS_SetNormalizedGain(device, LMS_CH_TX,0, 1)){
             error();
         }
         if(LMS_GetLPFBWRange(device, LMS_CH_TX, &bandwidth_range_tx) != 0){
+            error();
+        }
+        cout << "Setting the RF bandwidth ..." << endl;
+        if(LMS_SetLPFBW(device, LMS_CH_TX, 0, 100e6)!= 0){
             error();
         }
         cout << "TX bandwidth range: " << bandwidth_range_tx.min/(1e6)<<" MHz <--> "<<bandwidth_range_tx.max/(1e6) <<" MHz"<< endl;
         if(LMS_SetLPF(device, LMS_CH_TX,0,true) != 0){
             error();
         }
-        if(LMS_SetLPFBW(device, LMS_CH_TX, 0, 100e6)!= 0){
+        
+        if (LMS_SetAntenna(device, LMS_CH_TX, 0, LMS_PATH_TX1)!=0){   //TX1_1        
             error();
         }
-        if (LMS_SetAntenna(device, LMS_CH_TX, 0, LMS_PATH_TX1)!=0){   //TX1_1        
+
+        if (LMS_Calibrate(device, LMS_CH_TX, 0, 100e6,0)!=0){         
             error();
         }
 
         running = true;
         std::thread thread = std::thread(FMCWTransmitter);
-        cout << "Press <enter> to stop the stream ..."
+        cout << "Press <enter> to stop the stream ..." << endl;
         cin.ignore();
         running = false;
         thread.join();
