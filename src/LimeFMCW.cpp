@@ -331,11 +331,3 @@ uint8_t LimeFMCW::error(){
     }
     exit(-1);
 }
-static void threadTest(){
-    while(lime_device_running){
-        cout << "thread start" << endl;
-        this_thread::sleep_for(chrono::seconds(1));
-        cout << "thread end" << endl;
-        this_thread::sleep_for(chrono::seconds(1));
-    }
-}

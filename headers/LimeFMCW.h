@@ -137,11 +137,7 @@ namespace MBLLEB006{
         /**
          * @Brief A helper function for reporting errors
          */
-        uint8_t error(); 
-
-        void threadTest();
-
-        void runThread();  
+        uint8_t error();  
         
     private:
         /******** private variables *******/
