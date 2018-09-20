@@ -24,17 +24,19 @@ using namespace MBLLEB006;
  * 
  */
 
+
 lms_device_t* device;
-const double sampleRate = 5e6;
+const double sampleRate = 10e6;
 bool running;
-const int tx_size = 1024*16;
+const int tx_size = 1024*2;
 float tx_buffer[2*tx_size];
 double gain_tx = 1;
 float bandwidth = 50e6;
 
-float f_start = 20e6;
+float f_start = 10e6;
 float f_sweep = f_start + bandwidth;
-float t_cpi = 10;
+float t_cpi = 100;
+lms_range_t bandwidth_range_tx;
 
 int error()
 {
@@ -43,7 +45,7 @@ int error()
   exit(-1);
 }
 
-void StreamTest(){
+void FMCWTransmitter(){
     lms_stream_t tx_stream;
     tx_stream.channel = 0;
     tx_stream.fifoSize = 256*1024;
@@ -56,6 +58,7 @@ void StreamTest(){
     meta_tx.flushPartialPacket = false;
     meta_tx.timestamp = 0;
 
+    // Fill the tx_buffer with fmcw data.
     for (int x = 0; x <tx_size; x++)
     {
         float delta = x / (float)tx_size;
@@ -64,6 +67,7 @@ void StreamTest(){
         tx_buffer[2*x] = cos(phase);
         tx_buffer[2*x+1] = sin(phase);
     }
+
 
     LMS_SetupStream(device, &tx_stream);
     LMS_StartStream(&tx_stream);
@@ -103,22 +107,24 @@ int main(int argc, char** argv){
         if (LMS_SetLOFrequency(device,LMS_CH_TX, 0, 500e6)!=0){
             error();
         }
-    
-        if(LMS_SetNormalizedGain(device, LMS_CH_TX,0, gain_tx)){
+        if(LMS_GetLPFBWRange(device, LMS_CH_TX, &bandwidth_range_tx) != 0){
             error();
         }
-
+        cout << "TX bandwidth range: " << bandwidth_range_tx.min/(1e6)<<" MHz <--> "<<bandwidth_range_tx.max/(1e6) <<" MHz"<< endl;
+        if(LMS_SetLPF(device, LMS_CH_TX,0,true) != 0){
+            error();
+        }
+        if(LMS_SetLPFBW(device, LMS_CH_TX, 0, 100e6)!= 0){
+            error();
+        }
         if (LMS_SetAntenna(device, LMS_CH_TX, 0, LMS_PATH_TX1)!=0){   //TX1_1        
             error();
         }
 
-        if (LMS_Calibrate(device, LMS_CH_TX, 0, bandwidth,0)!=0){         
-            error();
-        }
-
         running = true;
-        std::thread thread = std::thread(StreamTest);
-        this_thread::sleep_for(chrono::seconds(60));
+        std::thread thread = std::thread(FMCWTransmitter);
+        cout << "Press <enter> to stop the stream ..."
+        cin.ignore();
         running = false;
         thread.join();
 
