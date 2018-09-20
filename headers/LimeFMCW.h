@@ -28,7 +28,7 @@
 #define NUMBER_OF_CHANNELS  2
 
 // Define the time(sec) to transmit and receive data
-#define TRANSMISSION_RECEIVE_TIME   10
+#define TRANSMISSION_RECEIVE_TIME   60
 
 // Uncomment one or both of this micros to use that path
 //#define USE_LIMEFMCW_CH_RX

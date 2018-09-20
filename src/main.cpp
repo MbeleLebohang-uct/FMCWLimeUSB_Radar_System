@@ -54,21 +54,13 @@ int main(int argc, char** argv){
         
 	RaptorWatch.configLimeChannels(center_freq_rx,center_freq_tx, gain_rx,gain_tx,sampling_rate);
 
-	/*RaptorWatch.setRFBandwidth(bandwidth);
+	RaptorWatch.setRFBandwidth(bandwidth);
 
-	RaptorWatch.configSystemStreams(fifosize,throughputVsLatency, f_start, f_sweep, t_cpi);*/
+	RaptorWatch.configSystemStreams(fifosize,throughputVsLatency, f_start, f_sweep, t_cpi);
 	
+	RaptorWatch.startFMCWTransmit();
 
-	// Run a transmit thread separately
-    RaptorWatch.lime_device_running = true;
-    std::thread thread = std::thread(RaptorWatch.threadTest);
-    
-    cout << "Press <enter> to stop stransmitting..." << endl;
-    cin.ignore();
-
-    RaptorWatch.lime_device_running = false;
-    thread.join();
-	//RaptorWatch.stopFMCWTransmit();
+	RaptorWatch.stopFMCWTransmit();
 	cout << "------------------D O N E------------------" << endl;
     return 0;
 }
