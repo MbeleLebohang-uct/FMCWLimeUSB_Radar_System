@@ -123,9 +123,7 @@ uint8_t LimeFMCW::configTestSignal(lms_testsig_t pTestSignalOneType, lms_testsig
     return 0;
 }
 
-void LimeFMCW::configSystemStreams(uint16_t pFIFOSize, float pThroughputVsLatency, float pF_start, float pF_sweep, float pT_cpi){
-    // Set the bufferSize
-    this->buffer_size = pFIFOSize * 32;
+void LimeFMCW::configSystemStreams(float pThroughputVsLatency, float pF_start, float pF_sweep, float pT_cpi){
     
     // ThroughputVsLatency is a vallue between 0..1
     pThroughputVsLatency = ((pThroughputVsLatency > 1.0)||(pThroughputVsLatency < 0)) ? 0.5 : pThroughputVsLatency;
@@ -133,7 +131,7 @@ void LimeFMCW::configSystemStreams(uint16_t pFIFOSize, float pThroughputVsLatenc
     for (int channel_index = 0; channel_index < NUMBER_OF_CHANNELS; channel_index++){
 #ifdef USE_LIMEFMCW_CH_TX
         this->tx_streams[channel_index].channel = channel_index;
-        this->tx_streams[channel_index].fifoSize = pFIFOSize * pFIFOSize;
+        this->tx_streams[channel_index].fifoSize = 256*1024;
         this->tx_streams[channel_index].throughputVsLatency = pThroughputVsLatency;
         this->tx_streams[channel_index].isTx = true;
         this->tx_streams[channel_index].dataFmt = lms_stream_t::LMS_FMT_F32;
@@ -145,7 +143,7 @@ void LimeFMCW::configSystemStreams(uint16_t pFIFOSize, float pThroughputVsLatenc
 #endif
 #ifdef USE_LIMEFMCW_CH_RX
         this->rx_streams[channel_index].channel = channel_index;
-        this->rx_streams[channel_index].fifoSize = pFIFOSize * pFIFOSize;
+        this->rx_streams[channel_index].fifoSize = 256*1024;
         this->rx_streams[channel_index].throughputVsLatency = pThroughputVsLatency;
         this->rx_streams[channel_index].isTx = false;
         this->rx_streams[channel_index].dataFmt = lms_stream_t::LMS_FMT_F32;
@@ -169,7 +167,7 @@ void LimeFMCW::configSystemStreams(uint16_t pFIFOSize, float pThroughputVsLatenc
         cout << "TX channel " << channel_index << " streams running..." << endl;
 #endif
 #ifdef USE_LIMEFMCW_CH_RX
-        this->rx_buffers[channel_index] = new float[this->buffer_size*2];       
+        this->rx_buffers[channel_index] = new float[BUFFER_SIZE*2];       
         LMS_StartStream(&this->rx_streams[channel_index]);
         cout << "RX channel " << channel_index << " streams running..." << endl;
 #endif       
@@ -194,14 +192,14 @@ void LimeFMCW::startFMCWTransmit(){
     while((chrono::high_resolution_clock::now() - t1) < chrono::seconds(TRANSMISSION_RECEIVE_TIME)){
         for (int channel_index = 0; channel_index < NUMBER_OF_CHANNELS; channel_index++){
 #ifdef USE_LIMEFMCW_CH_TX           
-        int sent_samples = LMS_SendStream(&this->tx_streams[channel_index], this->tx_buffers[channel_index], this->buffer_size,&this->tx_metadata,1000);
-        if(sent_samples != this->buffer_size){
-            cout << "WARNING: Samples sent: " << sent_samples << "/" << this->buffer_size << endl;
+        int sent_samples = LMS_SendStream(&this->tx_streams[channel_index], this->tx_buffers[channel_index], BUFFER_SIZE,&this->tx_metadata,1000);
+        if(sent_samples != BUFFER_SIZE){
+            cout << "WARNING: Samples sent: " << sent_samples << "/" << BUFFER_SIZE << endl;
         }
 #endif   
 #ifdef USE_LIMEFMCW_CH_RX           
         int samplesRead;
-        samplesRead = LMS_RecvStream(&this->rx_streams[channel_index], this->rx_buffers[channel_index], this->buffer_size,&this->tx_metadata,1000);
+        samplesRead = LMS_RecvStream(&this->rx_streams[channel_index], this->rx_buffers[channel_index], BUFFER_SIZE,&this->tx_metadata,1000);
 #endif          
         }
     }
@@ -264,11 +262,8 @@ void LimeFMCW::generateLinearChirpSignal(float f_start, float f_sweep, float t_c
 #ifdef USE_LIMEFMCW_CH_TX 
     cout << "Generating a linear chirp signal with: f_0 = "<< f_start <<" f_1 = "<< f_sweep <<" T_CPI = "<< t_cpi << endl;   
     for (int channel_index = 0; channel_index < NUMBER_OF_CHANNELS; channel_index++){
-        
-        this->tx_buffers[channel_index] = new float[this->buffer_size*2];
-
-        for (int x = 0; x < buffer_size; ++x){
-            float delta = x / (float)buffer_size;
+        for (int x = 0; x < BUFFER_SIZE; ++x){
+            float delta = x / (float)BUFFER_SIZE;
             float t = t_cpi * delta;
             float phase = 2 * M_PI * t * (f_start + (f_sweep - f_start) * delta / 2);
 
@@ -280,6 +275,20 @@ void LimeFMCW::generateLinearChirpSignal(float f_start, float f_sweep, float t_c
     cout << "USE_LIMEFMCW_CH_TX is not defined. Therefore chirp signal cannot be generated..." << endl;
 #endif
 }
+
+void LimeFMCW::printChirpSignal(){
+#ifdef USE_LIMEFMCW_CH_TX 
+    for (int channel_index = 0; channel_index < NUMBER_OF_CHANNELS; channel_index++){
+        for (int x = 0; x < BUFFER_SIZE; ++x){
+            cout << this->tx_buffers[channel_index][2*x] << "   ";
+            cout << this->tx_buffers[channel_index][2*x + 1] << endl;
+        }
+    }
+#else
+    cout << "USE_LIMEFMCW_CH_TX is not defined. Therefore chirp signal cannot be generated..." << endl;
+#endif
+}
+
 
 void LimeFMCW::setRFBandwidth(float pBandwidth){
     cout << "NOTE: If the bandwidth value is out of bounds, it will be adjusted accordingly." << endl;

@@ -29,6 +29,7 @@
 
 // Define the time(sec) to transmit and receive data
 #define TRANSMISSION_RECEIVE_TIME   60
+#define BUFFER_SIZE   1024*16
 
 // Uncomment one or both of this micros to use that path
 //#define USE_LIMEFMCW_CH_RX
@@ -74,13 +75,12 @@ namespace MBLLEB006{
 
         /**
          * @Brief Configure the signal and start the stream
-         * @param pFIFOSize
-                  pThroughputVsLatency - look at limesuite.h for more info
-                  pF_start - The initial frequency to start transmitting from
+         * @param pThroughputVsLatency - look at limesuite.h for more info
+         *         pF_start - The initial frequency to start transmitting from
          *        pF_sweep  - Sweep frequency
          *        pT_cpi  - coherent processing interval
          */
-        void configSystemStreams(uint16_t pFIFOSize, float pThroughputVsLatency, float pF_start, float pF_sweep, float pT_cpi);
+        void configSystemStreams(float pThroughputVsLatency, float pF_start, float pF_sweep, float pT_cpi);
 
         /**
          * @Brief Start transmitting FMCW signal
@@ -110,7 +110,7 @@ namespace MBLLEB006{
          *        t_cpi  - coherent processing interval
          */
         void generateLinearChirpSignal(float pF_start, float pF_sweep, float pT_cpi);
-
+        void printChirpSignal();
         /**
          * @Brief Set the bandwidth of a single channel at the time
          *        define USE_LIMEFMCW_CH_TX and USE_LIMEFMCW_CH_RX to set the bandwidth of that specific path
@@ -144,9 +144,8 @@ namespace MBLLEB006{
         float       frequency_center_tx;
         float       frequency_center_rx;
         float       sampling_rate;
-        float       *rx_buffers[NUMBER_OF_CHANNELS];
-        float       *tx_buffers[NUMBER_OF_CHANNELS];
-        int         buffer_size;
+        float       rx_buffers[NUMBER_OF_CHANNELS][BUFFER_SIZE*2];
+        float       tx_buffers[NUMBER_OF_CHANNELS][BUFFER_SIZE*2];
 
         lms_range_t bandwidth_range_tx;
         lms_range_t bandwidth_range_rx;
