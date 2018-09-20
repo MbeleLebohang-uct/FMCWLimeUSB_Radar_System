@@ -14,6 +14,7 @@
 #include <iostream>
 #include <chrono>
 #include <math.h>
+#include <thread>
 #include <lime/LimeSuite.h>
 
 #ifndef LIMEFMCW_H
@@ -64,7 +65,7 @@ namespace MBLLEB006{
          *          pGain_tx -TX Channel gain
          *          pSampling_rate - Sampling rate which will be doubled (x4)
          */
-        uint8_t configLimeChannel(uint8_t pChannel, float pFrequency_center_rx, float pFrequency_center_tx, float pGain_rx, float pGain_tx,float pSampling_rate);
+        void configLimeChannels(float pFrequency_center_rx, float pFrequency_center_tx, float pGain_rx, float pGain_tx,float pSampling_rate);
         
         /**
          * @Brief Enable or disable the test signal
@@ -79,7 +80,7 @@ namespace MBLLEB006{
          *        pF_sweep  - Sweep frequency
          *        pT_cpi  - coherent processing interval
          */
-        uint8_t configSystemStream(uint16_t pFIFOSize, float pThroughputVsLatency, float pF_start, float pF_sweep, float pT_cpi);
+        void configSystemStreams(uint16_t pFIFOSize, float pThroughputVsLatency, float pF_start, float pF_sweep, float pT_cpi);
 
         /**
          * @Brief Start transmitting FMCW signal
@@ -117,7 +118,7 @@ namespace MBLLEB006{
          * @param   pbandwidth - bandwidth value. Must not exceed the min-max of that channel
          *          
          */
-        uint8_t setRFBandwidth(float pBandwidth);
+        void setRFBandwidth(float pBandwidth);
 
         /**
          * @Brief Get the RX center frequency channel
@@ -136,7 +137,11 @@ namespace MBLLEB006{
         /**
          * @Brief A helper function for reporting errors
          */
-        uint8_t error();   
+        uint8_t error(); 
+
+        void threadTest();
+
+        void runThread();  
         
     private:
         /******** private variables *******/

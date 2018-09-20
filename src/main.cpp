@@ -34,11 +34,41 @@ float tx_buffer[2*tx_size];
 float start_freq = 10.0;
 float bandwidth = 50000000.0;
 
+//Channel config params
+float center_freq_rx = 500e6;		// 500 MHz
+float center_freq_tx = 500e6;		// 500 MHz
+float gain_rx		 = 1;			// 1 = max gain = 73 dB
+float gain_tx		 = 1;
+double sampling_rate = 5e6;
+
+uint16_t fifosize = 1024;
+float throughputVsLatency = 0.5;
+float f_start = 20e6;
+float f_sweep = f_start + bandwidth;
+float t_cpi = 10;
+	
+
 int main(int argc, char** argv){
 	cout << "-------Raptor Watch FMCW Radar System-------" << endl;
 	LimeFMCW RaptorWatch;
+        
+	RaptorWatch.configLimeChannels(center_freq_rx,center_freq_tx, gain_rx,gain_tx,sampling_rate);
 
-	RaptorWatch.stopFMCWTransmit();
+	/*RaptorWatch.setRFBandwidth(bandwidth);
+
+	RaptorWatch.configSystemStreams(fifosize,throughputVsLatency, f_start, f_sweep, t_cpi);*/
+	
+
+	// Run a transmit thread separately
+    RaptorWatch.lime_device_running = true;
+    std::thread thread = std::thread(RaptorWatch.threadTest);
+    
+    cout << "Press <enter> to stop stransmitting..." << endl;
+    cin.ignore();
+
+    RaptorWatch.lime_device_running = false;
+    thread.join();
+	//RaptorWatch.stopFMCWTransmit();
 	cout << "------------------D O N E------------------" << endl;
     return 0;
 }
