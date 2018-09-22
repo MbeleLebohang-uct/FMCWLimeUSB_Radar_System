@@ -25,7 +25,7 @@
 #define LIMEFMCW_CH_TX_RX   2
 
 // Define the number of channels to use on both RX and TX channel
-#define NUMBER_OF_CHANNELS  2
+#define NUMBER_OF_CHANNELS  1
 
 // Define the time(sec) to transmit and receive data
 #define TRANSMISSION_RECEIVE_TIME   60
@@ -149,6 +149,8 @@ namespace MBLLEB006{
 
         lms_range_t bandwidth_range_tx;
         lms_range_t bandwidth_range_rx;
+        lms_range_t samplingrate_range_tx;
+        lms_range_t samplingrate_range_rx;
         lms_stream_meta_t rx_metadata;
         lms_stream_meta_t tx_metadata;
         lms_stream_t rx_streams[NUMBER_OF_CHANNELS];

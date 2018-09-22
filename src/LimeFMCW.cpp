@@ -36,6 +36,14 @@ LimeFMCW::LimeFMCW(){
     }
     cout << "LimeSDR-USB device opened successfully." << endl;
 
+
+    cout << "Initializing the Lime device..." << endl;
+    if(LMS_Init(this->lime_device) != 0){
+        error();
+    }
+    cout << "Initialization complete!" << endl;
+    cout << "============================ Device Info ============================" << endl;
+
     if((n = LMS_GetNumChannels(this->lime_device, LMS_CH_RX)) < 0){
         error();
     }
@@ -57,6 +65,18 @@ LimeFMCW::LimeFMCW(){
     }
     cout << "TX bandwidth range: " << bandwidth_range_tx.min/(1e6)<<" MHz <--> "<<bandwidth_range_tx.max/(1e6) <<" MHz"<< endl;
 
+    if(LMS_GetSampleRateRange(this->lime_device, LMS_CH_RX, &samplingrate_range_rx) != 0){
+        error();
+    }
+    cout << "RX sampling rate range: " << samplingrate_range_rx.min/(1e6)<<" MHz <--> "<<samplingrate_range_rx.max/(1e6) <<" MHz"<< endl;
+
+    if(LMS_GetSampleRateRange(this->lime_device, LMS_CH_TX, &samplingrate_range_tx) != 0){
+        error();
+    }
+    cout << "TX sampling rate range: " << samplingrate_range_tx.min/(1e6)<<" MHz <--> "<<samplingrate_range_tx.max/(1e6) <<" MHz"<< endl;
+    
+    cout << "=====================================================================" << endl;
+
 }
 
 LimeFMCW::~LimeFMCW(){
@@ -71,29 +91,45 @@ void  LimeFMCW::configLimeChannels(float pFrequency_center_rx, float pFrequency_
     this->frequency_center_rx = pFrequency_center_rx;
     this->sampling_rate = pSampling_rate;
 
-    cout << "Initializing the Lime device..." << endl;
-    if(LMS_Init(this->lime_device) != 0){
-        error();
-    }
-    cout << "Initialization complete!" << endl;
 
     for (int channel_index = 0; channel_index < NUMBER_OF_CHANNELS; channel_index++){
 #ifdef USE_LIMEFMCW_CH_TX
         if(LMS_EnableChannel(this->lime_device, LMS_CH_TX,channel_index, true)){
             error();
         }
+
+        cout << "Center frequency of TX channel " <<channel_index<< " is set to -> "<< this->frequency_center_tx << endl;
         if(LMS_SetLOFrequency(this->lime_device, LMS_CH_TX,channel_index, frequency_center_tx)){
             error();
         }
         if(LMS_SetNormalizedGain(this->lime_device, LMS_CH_TX,channel_index, pGain_tx)){
             error();
         }
-        cout << "Enabling TX complete..."<< endl;
+        cout << "Enabling TX channel " <<channel_index<< " is complete..."<< endl;
+
+        if(channel_index == 0){
+            if (LMS_SetAntenna(this->lime_device, LMS_CH_TX, channel_index, LMS_PATH_TX1)!=0){   //TX1_1 
+                error();
+            }
+            else{
+                cout << "Setting the antenna for TX channel "<<channel_index<<" to: LMS_PATH_TX1"<< endl;
+            }
+        }
+        if(channel_index == 1){
+            if (LMS_SetAntenna(this->lime_device, LMS_CH_TX, channel_index, LMS_PATH_TX2)!=0){   //TX1_1 
+                error();
+            }
+            else{
+                cout << "Setting the antenna for TX channel "<<channel_index<<" to: LMS_PATH_TX2"<< endl;
+            }
+        }
 #endif
 #ifdef USE_LIMEFMCW_CH_RX
         if(LMS_EnableChannel(this->lime_device, LMS_CH_RX,channel_index, true)){
             error();
         }
+
+        cout << "Center frequency of RX is set to -> "<< this->frequency_center_rx << endl;
         if(LMS_SetLOFrequency(this->lime_device, LMS_CH_RX,channel_index, frequency_center_rx)){
             error();
         }
@@ -103,11 +139,9 @@ void  LimeFMCW::configLimeChannels(float pFrequency_center_rx, float pFrequency_
         cout << "Enabling RX complete..."<< endl;
 #endif
     }
-    cout << "Center frequency of RX is set to -> "<< this->frequency_center_rx << endl;
-    cout << "Center frequency of TX is set to -> "<< this->frequency_center_tx << endl;
     
     cout << "Setting Lime device sampling rate to -> "<< this->sampling_rate << endl;
-    if(LMS_SetSampleRate(this->lime_device, this->sampling_rate,4)){
+    if(LMS_SetSampleRate(this->lime_device, this->sampling_rate,0)){
         error();
     }
     cout << "Channel configuration is complete." << endl;
@@ -128,6 +162,12 @@ void LimeFMCW::configSystemStreams(float pThroughputVsLatency, float pF_start, f
     // ThroughputVsLatency is a vallue between 0..1
     pThroughputVsLatency = ((pThroughputVsLatency > 1.0)||(pThroughputVsLatency < 0)) ? 0.5 : pThroughputVsLatency;
 
+    // Setup data buffers
+#ifdef USE_LIMEFMCW_CH_TX
+    // Fill the TX buffer with transmit IQ data
+    generateLinearChirpSignal(pF_start,pF_sweep,pT_cpi);
+#endif
+
     for (int channel_index = 0; channel_index < NUMBER_OF_CHANNELS; channel_index++){
 #ifdef USE_LIMEFMCW_CH_TX
         this->tx_streams[channel_index].channel = channel_index;
@@ -140,6 +180,9 @@ void LimeFMCW::configSystemStreams(float pThroughputVsLatency, float pF_start, f
             error();
         }
         cout << "TX channel "<< channel_index <<" streams has been setup successfully ..." << endl;
+
+        LMS_StartStream(&this->tx_streams[channel_index]);
+        cout << "TX channel " << channel_index << " streams running..." << endl;
 #endif
 #ifdef USE_LIMEFMCW_CH_RX
         this->rx_streams[channel_index].channel = channel_index;
@@ -152,25 +195,11 @@ void LimeFMCW::configSystemStreams(float pThroughputVsLatency, float pF_start, f
             error();
         }
         cout << "RX channel "<< channel_index <<" streams has been setup successfully ..." << endl;
-#endif
-    }
 
-    // Setup data buffers
-    // Initialize the stream
-    for (int channel_index = 0; channel_index < NUMBER_OF_CHANNELS; ++channel_index){
-#ifdef USE_LIMEFMCW_CH_TX
-        // Fill the TX buffer with transmit IQ data
-        generateLinearChirpSignal(pF_start,pF_sweep,pT_cpi);
-        cout << "TX channel " << channel_index << " buffers filled with IQ data..." << endl;
-
-        LMS_StartStream(&this->tx_streams[channel_index]);
-        cout << "TX channel " << channel_index << " streams running..." << endl;
-#endif
-#ifdef USE_LIMEFMCW_CH_RX
         this->rx_buffers[channel_index] = new float[BUFFER_SIZE*2];       
         LMS_StartStream(&this->rx_streams[channel_index]);
         cout << "RX channel " << channel_index << " streams running..." << endl;
-#endif       
+#endif
     }
 }
 
@@ -183,7 +212,7 @@ void LimeFMCW::startFMCWTransmit(){
 #endif
 #ifdef USE_LIMEFMCW_CH_TX
     this->tx_metadata.flushPartialPacket = false;
-    this->tx_metadata.waitForTimestamp   = true;
+    this->tx_metadata.waitForTimestamp   = false;
     this->tx_metadata.timestamp = 0;
 #endif
     auto t1 = chrono::high_resolution_clock::now();
@@ -262,6 +291,7 @@ void LimeFMCW::generateLinearChirpSignal(float f_start, float f_sweep, float t_c
 #ifdef USE_LIMEFMCW_CH_TX 
     cout << "Generating a linear chirp signal with: f_0 = "<< f_start <<" f_1 = "<< f_sweep <<" T_CPI = "<< t_cpi << endl;   
     for (int channel_index = 0; channel_index < NUMBER_OF_CHANNELS; channel_index++){
+        cout << "Initializing channel " << channel_index << " TX buffer" << endl;
         for (int x = 0; x < BUFFER_SIZE; ++x){
             float delta = x / (float)BUFFER_SIZE;
             float t = t_cpi * delta;
@@ -270,6 +300,7 @@ void LimeFMCW::generateLinearChirpSignal(float f_start, float f_sweep, float t_c
             this->tx_buffers[channel_index][2*x] = cos(phase);
             this->tx_buffers[channel_index][2*x + 1] = sin(phase);
         }
+        cout << "TX channel " << channel_index << " buffers filled with IQ data..." << endl;
     }
 #else
     cout << "USE_LIMEFMCW_CH_TX is not defined. Therefore chirp signal cannot be generated..." << endl;
@@ -305,16 +336,32 @@ void LimeFMCW::setRFBandwidth(float pBandwidth){
     
     for (int channel_index = 0; channel_index < NUMBER_OF_CHANNELS; channel_index++){
 #ifdef USE_LIMEFMCW_CH_TX
+        if(LMS_SetLPF(this->lime_device, LMS_CH_TX,channel_index,true) != 0){
+            error();
+        }
         if(LMS_SetLPFBW(this->lime_device, LMS_CH_TX, channel_index, pBandwidth) != 0){
             error();
         }
         cout << "Setting bandwidth of TX channel "<< channel_index<<" to -> "<< pBandwidth << endl;
+        
+        cout << "Calibrating TX channel "<< channel_index<<" ... " << endl;
+        if (LMS_Calibrate(this->lime_device, LMS_CH_TX, channel_index, pBandwidth,0)!=0){         
+            error();
+        }
 #endif        
 #ifdef USE_LIMEFMCW_CH_RX
+        if(LMS_SetLPF(this->lime_device, LMS_CH_RX,channel_index,true) != 0){
+            error();
+        }
         if(LMS_SetLPFBW(this->lime_device, LMS_CH_RX, channel_index, pBandwidth) != 0){
             error();
         }
         cout << "Setting bandwidth of RX channel "<< channel_index<<" to -> "<< pBandwidth << endl;
+
+        cout << "Calibrating RX channel "<< channel_index<<" ... " << endl;
+        if (LMS_Calibrate(this->lime_device, LMS_CH_RX, channel_index, pBandwidth,0)!=0){         
+            error();
+        }
 #endif
     }
 }
