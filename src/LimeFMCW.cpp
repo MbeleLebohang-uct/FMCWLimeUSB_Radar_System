@@ -289,13 +289,13 @@ void LimeFMCW::stopFMCWTransmit(){
 
 void LimeFMCW::generateLinearChirpSignal(float f_start, float f_sweep, float t_cpi){
 #ifdef USE_LIMEFMCW_CH_TX 
-    //cout << "Generating a linear chirp signal with: f_0 = "<< f_start <<" f_1 = "<< f_sweep <<" T_CPI = "<< t_cpi << endl;   
+    cout << "Generating a linear chirp signal with: f_0 = "<< f_start <<" f_1 = "<< f_sweep <<" T_CPI = "<< t_cpi << endl;   
     for (int channel_index = 0; channel_index < NUMBER_OF_CHANNELS; channel_index++){
         cout << "Initializing channel " << channel_index << " TX buffer" << endl;
         for (int x = 0; x < BUFFER_SIZE; ++x){
-            //float delta = x / (float)BUFFER_SIZE;
-            //float t = t_cpi * delta;
-            float phase = 2 * M_PI * x * (f_start);// + (f_sweep - f_start) * delta / 2);
+            float delta = x / (float)BUFFER_SIZE;
+            float t = t_cpi * delta;
+            float phase = 2 * M_PI * t * (f_start + (f_sweep - f_start) * delta / 2);
 
             this->tx_buffers[channel_index][2*x] = cos(phase);
             this->tx_buffers[channel_index][2*x + 1] = sin(phase);
