@@ -34,11 +34,11 @@ float center_freq_rx = 500e6;       // 500 MHz
 float center_freq_tx = 500e6;       // 500 MHz
 float gain_rx        = 1;           // 1 = max gain = 73 dB
 float gain_tx        = 1;
-double sampling_rate = 20e6;		// This will be scaled by a factor of 4x8, sampling_freq = sampling_rage x 4 x 8
+double sampling_rate = 60e6;		// This will be scaled by a factor of 4x8, sampling_freq = sampling_rage x 4 x 8
 
 float throughputVsLatency = 0.5;
 float f_start = 20e6;
-float bandwidth = 20e6;
+float bandwidth = 40e6;
 float f_sweep = f_start + bandwidth;
 float t_cpi = 10e-3;
 

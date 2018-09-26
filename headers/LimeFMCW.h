@@ -29,7 +29,7 @@
 
 // Define the time(sec) to transmit and receive data
 #define TRANSMISSION_RECEIVE_TIME   60
-#define BUFFER_SIZE   1024*256
+#define BUFFER_SIZE   1024*32
 
 // Uncomment one or both of this micros to use that path
 //#define USE_LIMEFMCW_CH_RX
@@ -110,6 +110,9 @@ namespace MBLLEB006{
          *        t_cpi  - coherent processing interval
          */
         void generateLinearChirpSignal(float pF_start, float pF_sweep, float pT_cpi);
+        
+        void wilkinsonLinearChirpSignal(float pF_start, float pF_sweep, float pT_cpi);
+
         void printChirpSignal();
         /**
          * @Brief Set the bandwidth of a single channel at the time
