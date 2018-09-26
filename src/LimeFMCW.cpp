@@ -141,7 +141,7 @@ void  LimeFMCW::configLimeChannels(float pFrequency_center_rx, float pFrequency_
     }
     
     cout << "Setting Lime device sampling rate to -> "<< this->sampling_rate << endl;
-    if(LMS_SetSampleRate(this->lime_device, this->sampling_rate,0)){
+    if(LMS_SetSampleRate(this->lime_device, this->sampling_rate,8)){
         error();
     }
     cout << "Channel configuration is complete." << endl;
@@ -336,7 +336,7 @@ void LimeFMCW::setRFBandwidth(float pBandwidth){
     
     for (int channel_index = 0; channel_index < NUMBER_OF_CHANNELS; channel_index++){
 #ifdef USE_LIMEFMCW_CH_TX
-        if(LMS_SetLPF(this->lime_device, LMS_CH_TX,channel_index,true) != 0){
+        if(LMS_SetLPF(this->lime_device, LMS_CH_TX,channel_index,false) != 0){
             error();
         }
         if(LMS_SetLPFBW(this->lime_device, LMS_CH_TX, channel_index, pBandwidth) != 0){

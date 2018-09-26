@@ -39,4 +39,4 @@ bin/%.o: tests/%.cpp
 .PHONY: clean
 clean:
 	rm -f bin/*.o 
-	rm  ./fmcwradar ./fmcwradartest
+	rm  ./fmcwradar
