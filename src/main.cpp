@@ -38,9 +38,9 @@ double sampling_rate = 60e6;		// This will be scaled by a factor of 4x8, samplin
 
 float throughputVsLatency = 0.5;
 float f_start = 20e6;
-float bandwidth = 40e6;
+float bandwidth = 60e6;
 float f_sweep = f_start + bandwidth;
-float t_cpi = 10e-3;
+float t_cpi = 1e-3;
 
 int main(int argc, char** argv){
     cout << "-------Raptor Watch FMCW Radar System-------" << endl;

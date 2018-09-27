@@ -165,7 +165,6 @@ void LimeFMCW::configSystemStreams(float pThroughputVsLatency, float pF_start, f
     // Setup data buffers
 #ifdef USE_LIMEFMCW_CH_TX
     // Fill the TX buffer with transmit IQ data
-    //wilkinsonLinearChirpSignal((pF_start,pF_sweep,pT_cpi))
     generateLinearChirpSignal(pF_start,pF_sweep,pT_cpi);
 #endif
 
@@ -300,57 +299,6 @@ void LimeFMCW::generateLinearChirpSignal(float f_start, float f_sweep, float t_c
 
             this->tx_buffers[channel_index][2*x] = cos(phase);
             this->tx_buffers[channel_index][2*x + 1] = sin(phase);
-        }
-        cout << "TX channel " << channel_index << " buffers filled with IQ data..." << endl;
-    }
-#else
-    cout << "USE_LIMEFMCW_CH_TX is not defined. Therefore chirp signal cannot be generated..." << endl;
-#endif
-}
-/*
-        c = 1540;          % Speed of sound in water
-        fs = 80000;        % This is the sample rate of the sonar.
-        dt = 1/fs;         % This is the sample spacing
-        r_max = 10;        % Maximum range to which to simulate.
-        t_max = 2*r_max/c; % Time delay to max range
-
-        % define a time vector containing the time values of the samples
-        t = 0:dt:t_max;
-        N = length(t);     % Number of samples
-        % define a range vector containing the range values of the samples
-        r = c*t/2;
-        % NOW create the chirp pulse, shifted by an amount td,
-        % to start at some time td-T/2>=0.
-
-        f0 = 10000;       % Centre frequency is 10 kHz
-        B = 4000;         % Chirp bandwidth
-        T = 5E-3;         % Chirp pulse length
-        K = B/T;          % Chirp rate*/
-
-void LimeFMCW::wilkinsonLinearChirpSignal(float f0, float B, float T){
-#ifdef USE_LIMEFMCW_CH_TX 
-    /*********************** Chirp Params ***************************/
-    float c = 3e8;              // Speed of sound in water
-    float fs = 100e6;           // This is the sample rate of the sonar.
-    float dt = 1/fs;            // This is the sample spacing
-    float r_max = 100;          // Maximum range to which to simulate.
-    float t_max = 2*r_max/c;    // Time delay to max range
-
-    
-    int N = (int)(t_max/dt);     // Number of samples
-    float K = B/T;          // Chirp rate
-    float td = T/2;
-
-    /****************************************************************/
-    cout << "Generating a linear chirp signal with: f_0 = "<< f0 <<" B = "<< B <<" T_CPI = "<< T << endl;   
-    for (int channel_index = 0; channel_index < NUMBER_OF_CHANNELS; channel_index++){
-        cout << "Initializing channel " << channel_index << " TX buffer" << endl;
-
-        for (int t = 0; t < N; t++){
-            float phase = 2*M_PI*(t-td)*(f0 + 0.5*K*(t-td));
-
-            this->tx_buffers[channel_index][2*t] = cos(phase);
-            this->tx_buffers[channel_index][2*t + 1] = sin(phase);
         }
         cout << "TX channel " << channel_index << " buffers filled with IQ data..." << endl;
     }

@@ -111,9 +111,13 @@ namespace MBLLEB006{
          */
         void generateLinearChirpSignal(float pF_start, float pF_sweep, float pT_cpi);
         
-        void wilkinsonLinearChirpSignal(float pF_start, float pF_sweep, float pT_cpi);
-
+        /**
+         * @Brief Print a linear chirp signal that will be dtransmitted
+         *
+         * @param None
+         */
         void printChirpSignal();
+        
         /**
          * @Brief Set the bandwidth of a single channel at the time
          *        define USE_LIMEFMCW_CH_TX and USE_LIMEFMCW_CH_RX to set the bandwidth of that specific path
