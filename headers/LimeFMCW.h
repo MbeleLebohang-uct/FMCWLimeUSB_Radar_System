@@ -29,7 +29,7 @@
 
 // Define the time(sec) to transmit and receive data
 #define TRANSMISSION_RECEIVE_TIME   60
-#define BUFFER_SIZE   1024*32
+#define BUFFER_SIZE   1024*2
 
 // Uncomment one or both of this micros to use that path
 //#define USE_LIMEFMCW_CH_RX
@@ -117,7 +117,7 @@ namespace MBLLEB006{
          * @param None
          */
         void printChirpSignal();
-        
+
         /**
          * @Brief Set the bandwidth of a single channel at the time
          *        define USE_LIMEFMCW_CH_TX and USE_LIMEFMCW_CH_RX to set the bandwidth of that specific path
