@@ -161,8 +161,8 @@ namespace MBLLEB006{
         float       frequency_center_tx;
         float       frequency_center_rx;
         float       sampling_rate;
-        float       rx_buffers[NUMBER_OF_CHANNELS][BUFFER_SIZE*2];
-        float       tx_buffers[NUMBER_OF_CHANNELS][BUFFER_SIZE*2];
+        float*      rx_buffers[NUMBER_OF_CHANNELS];
+        float*      tx_buffers[NUMBER_OF_CHANNELS];
 
         lms_range_t bandwidth_range_tx;
         lms_range_t bandwidth_range_rx;

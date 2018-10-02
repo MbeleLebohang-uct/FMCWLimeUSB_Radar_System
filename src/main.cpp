@@ -44,7 +44,7 @@ float t_cpi = 50;
 
 int main(int argc, char** argv){
     cout << "-------Raptor Watch FMCW Radar System-------" << endl;
-
+/*
     LimeFMCW RaptorWatch;
         
     RaptorWatch.configLimeChannels(center_freq_rx,center_freq_tx, gain_rx,gain_tx);
@@ -55,7 +55,52 @@ int main(int argc, char** argv){
     
     RaptorWatch.startFMCWTransmit();
 
-    RaptorWatch.stopFMCWTransmit();
+    RaptorWatch.stopFMCWTransmit();*/
+
+    int* arr[2];
+    for (int i = 0; i < 2; i++)
+    {
+    	if (arr[i] != NULL)
+    	{
+    		cout<<"SOMETHING WENT WRONG!" << endl;
+	    	delete[] arr[i];
+    	}else{
+    		cout<<"array is null as expected" << endl;
+    	}
+    }
+
+
+
+    for (int i = 0; i < 2; i++)
+    {
+    	arr[i] = new int[3];
+    }
+
+    for (int i = 0; i < 2; ++i)
+    {
+    	for (int x = 0; x < 3; ++x)
+    	{
+    		arr[i][x] = 2*x + 1;
+
+    	}
+    }
+
+    for (int i = 0; i < 2; ++i)
+    {
+    	for (int x = 0; x < 3; ++x)
+    	{
+    		cout<< ">> : " << arr[i][x]<< endl;
+
+    	}
+    }
+
+    for (int i = 0; i < 2; i++)
+    {
+    	delete[] arr[i];
+    }
+
+    /*cout << "Array size: "<< sizeof(arr) << endl;*/
+    
     cout << "------------------D O N E------------------" << endl;
     return 0;
 }

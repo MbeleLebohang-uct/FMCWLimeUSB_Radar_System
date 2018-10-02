@@ -84,6 +84,22 @@ LimeFMCW::~LimeFMCW(){
     if(this->lime_device != NULL){
         LMS_Close(this->lime_device);
     }
+
+    // Perform memory clean up
+    cout << "Performing memory clean up." << endl;
+
+    for (int channel_index = 0; channel_index < NUMBER_OF_CHANNELS; ++channel_index){
+#ifdef USE_LIMEFMCW_CH_TX
+        if (tx_buffers[channel_index] != NULL){
+            delete[] tx_buffers[channel_index];
+        }
+#endif
+#ifdef USE_LIMEFMCW_CH_RX
+        if (rx_buffers[channel_index] != NULL){
+            delete[] rx_buffers[channel_index];
+        }
+#endif
+    }
 }
 
 void  LimeFMCW::configLimeChannels(float pFrequency_center_rx, float pFrequency_center_tx, float pGain_rx, float pGain_tx){
