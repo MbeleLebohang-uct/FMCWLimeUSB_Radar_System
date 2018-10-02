@@ -165,7 +165,8 @@ void LimeFMCW::configSystemStreams(float pThroughputVsLatency, float pF_start, f
     // Setup data buffers
 #ifdef USE_LIMEFMCW_CH_TX
     // Fill the TX buffer with transmit IQ data
-    generateLinearChirpSignal(pF_start,pF_sweep,pT_cpi);
+    //generateLinearChirpSignal(pF_start,pF_sweep,pT_cpi);
+    generateLinearDigitalFM(pF_start,pF_sweep,pT_cpi);
 #endif
 
     for (int channel_index = 0; channel_index < NUMBER_OF_CHANNELS; channel_index++){
@@ -186,7 +187,7 @@ void LimeFMCW::configSystemStreams(float pThroughputVsLatency, float pF_start, f
 #endif
 #ifdef USE_LIMEFMCW_CH_RX
         this->rx_streams[channel_index].channel = channel_index;
-        this->rx_streams[channel_index].fifoSize = 256*1024;
+        this->rx_streams[channel_index].fifoSize = 4*1024;
         this->rx_streams[channel_index].throughputVsLatency = pThroughputVsLatency;
         this->rx_streams[channel_index].isTx = false;
         this->rx_streams[channel_index].dataFmt = lms_stream_t::LMS_FMT_F32;
@@ -295,7 +296,7 @@ void LimeFMCW::generateLinearChirpSignal(float f_start, float f_sweep, float t_c
         for (int x = 0; x < BUFFER_SIZE; ++x){
             float delta = x / (float)BUFFER_SIZE;
             float t = t_cpi * delta;
-            float phase = 2 * M_PI * t * (f_start + (f_sweep - f_start) * delta / 2);
+            float phase = 2 * M_PI * t * (0*f_start + (f_sweep - f_start) * delta / 2);
 
             this->tx_buffers[channel_index][2*x] = cos(phase);
             this->tx_buffers[channel_index][2*x + 1] = sin(phase);
@@ -321,7 +322,7 @@ void LimeFMCW::generateLinearDigitalFM(float f_start, float f_end, float t_cpi){
         for (int n = 0; n < BUFFER_SIZE; n++){
             float t_n = (n - ((BUFFER_SIZE + 1)/2.0))*t_cpi;
 
-            float phase = 2 * M_PI * t_n * ( 0*f_start + (delta_f * t_n / (2*t_cpi)));
+            float phase = 2 * M_PI * t_n * ((delta_f * t_n / (2*t_cpi)));
 
             this->tx_buffers[channel_index][2*n] = cos(phase);
             this->tx_buffers[channel_index][2*n + 1] = sin(phase);

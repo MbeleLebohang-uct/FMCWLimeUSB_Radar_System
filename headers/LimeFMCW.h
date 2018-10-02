@@ -29,7 +29,7 @@
 
 // Define the time(sec) to transmit and receive data
 #define TRANSMISSION_RECEIVE_TIME   60
-#define BUFFER_SIZE   1024*16
+#define BUFFER_SIZE   128*2
 
 // Uncomment one or both of this micros to use that path
 //#define USE_LIMEFMCW_CH_RX
@@ -120,7 +120,7 @@ namespace MBLLEB006{
          *        t_cpi  - coherent processing interval
          */
         void generateLinearDigitalFM(float pF_start, float pF_sweep, float pT_cpi);
-        
+
         /**
          * @Brief print the generate a linear chirp signal
          *
