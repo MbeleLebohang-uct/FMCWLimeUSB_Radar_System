@@ -307,6 +307,32 @@ void LimeFMCW::generateLinearChirpSignal(float f_start, float f_sweep, float t_c
 #endif
 }
 
+void LimeFMCW::generateLinearDigitalFM(float f_start, float f_end, float t_cpi){
+#ifdef USE_LIMEFMCW_CH_TX 
+    cout << "Peyton Z. Peeble digital FM signal" << endl;   
+    cout << "Properties: f_0 = "<< f_start <<" f_1 = "<< f_end <<" T_CPI = "<< t_cpi << endl; 
+
+    for (int channel_index = 0; channel_index < NUMBER_OF_CHANNELS; channel_index++){
+        cout << "Initializing channel " << channel_index << " TX buffer" << endl;
+        
+        float delta_f = f_end - f_start;
+        float T_1 = t_cpi/BUFFER_SIZE;
+
+        for (int n = 0; n < BUFFER_SIZE; n++){
+            float t_n = (n - ((BUFFER_SIZE + 1)/2.0))*t_cpi;
+
+            float phase = 2 * M_PI * t_n * ( 0*f_start + (delta_f * t_n / (2*t_cpi)));
+
+            this->tx_buffers[channel_index][2*n] = cos(phase);
+            this->tx_buffers[channel_index][2*n + 1] = sin(phase);
+        }
+        cout << "TX channel " << channel_index << " buffers filled with IQ data..." << endl;
+    }
+#else
+    cout << "USE_LIMEFMCW_CH_TX is not defined. Therefore chirp signal cannot be generated..." << endl;
+#endif
+}
+
 void LimeFMCW::printChirpSignal(){
 #ifdef USE_LIMEFMCW_CH_TX 
     for (int channel_index = 0; channel_index < NUMBER_OF_CHANNELS; channel_index++){

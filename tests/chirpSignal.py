@@ -21,11 +21,11 @@ def digitalFMPeeble(f_start, f_end, T):
 
 	T_1 = T/((float)(N))
 	for n in range(1, N+1):
-		t_n = (n - ((N+1)/2.0))*T_1
+		t_n = (n + ((N+1)/2.0))*T_1
 		t.append(t_n)
 
-		phase = pi*delta_f*(t_n**2)/T
-		y.append(cos(-phase))
+		phase = 2*pi*(delta_f*(t_n**2)/(2*T))
+		y.append(cos(phase))
 
 	return t, y
 

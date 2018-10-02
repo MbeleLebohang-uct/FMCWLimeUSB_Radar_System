@@ -110,7 +110,24 @@ namespace MBLLEB006{
          *        t_cpi  - coherent processing interval
          */
         void generateLinearChirpSignal(float pF_start, float pF_sweep, float pT_cpi);
+        
+        /**
+         * @Brief Generate a linear chirp signal as specified in Radar Principles by Peeble Z. 
+         *        page 340
+         *
+         * @param f_start - The initial frequency to start transmitting from
+         *        f_sweep  - Sweep frequency
+         *        t_cpi  - coherent processing interval
+         */
+        void generateLinearDigitalFM(float pF_start, float pF_sweep, float pT_cpi);
+        
+        /**
+         * @Brief print the generate a linear chirp signal
+         *
+         * @param None
+         */
         void printChirpSignal();
+
         /**
          * @Brief Set the bandwidth of a single channel at the time
          *        define USE_LIMEFMCW_CH_TX and USE_LIMEFMCW_CH_RX to set the bandwidth of that specific path
