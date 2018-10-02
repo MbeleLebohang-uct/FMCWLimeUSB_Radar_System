@@ -36,7 +36,6 @@ float center_freq_rx = 500e6;       // 500 MHz
 float center_freq_tx = 500e6;       // 500 MHz
 float gain_rx        = 1;           // 1 = max gain = 73 dB
 float gain_tx        = 1;
-double sampling_rate = 1e6;
 
 float throughputVsLatency = 0.5;
 float f_start = 40e6;
@@ -48,7 +47,7 @@ int main(int argc, char** argv){
 
     LimeFMCW RaptorWatch;
         
-    RaptorWatch.configLimeChannels(center_freq_rx,center_freq_tx, gain_rx,gain_tx,sampling_rate);
+    RaptorWatch.configLimeChannels(center_freq_rx,center_freq_tx, gain_rx,gain_tx);
 
     RaptorWatch.setRFBandwidth(bandwidth);
 

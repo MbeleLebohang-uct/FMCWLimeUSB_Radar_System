@@ -66,7 +66,7 @@ namespace MBLLEB006{
          *          pGain_tx -TX Channel gain
          *          pSampling_rate - Sampling rate which will be doubled (x4)
          */
-        void configLimeChannels(float pFrequency_center_rx, float pFrequency_center_tx, float pGain_rx, float pGain_tx,float pSampling_rate);
+        void configLimeChannels(float pFrequency_center_rx, float pFrequency_center_tx, float pGain_rx, float pGain_tx);
         
         /**
          * @Brief Enable or disable the test signal

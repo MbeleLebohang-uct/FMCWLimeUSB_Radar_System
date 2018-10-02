@@ -86,10 +86,9 @@ LimeFMCW::~LimeFMCW(){
     }
 }
 
-void  LimeFMCW::configLimeChannels(float pFrequency_center_rx, float pFrequency_center_tx, float pGain_rx, float pGain_tx,float pSampling_rate){
+void  LimeFMCW::configLimeChannels(float pFrequency_center_rx, float pFrequency_center_tx, float pGain_rx, float pGain_tx){
     this->frequency_center_tx = pFrequency_center_tx;
     this->frequency_center_rx = pFrequency_center_rx;
-    this->sampling_rate = pSampling_rate;
 
 
     for (int channel_index = 0; channel_index < NUMBER_OF_CHANNELS; channel_index++){
@@ -116,7 +115,7 @@ void  LimeFMCW::configLimeChannels(float pFrequency_center_rx, float pFrequency_
             }
         }
         if(channel_index == 1){
-            if (LMS_SetAntenna(this->lime_device, LMS_CH_TX, channel_index, LMS_PATH_TX2)!=0){   //TX1_1 
+            if (LMS_SetAntenna(this->lime_device, LMS_CH_TX, channel_index, LMS_PATH_TX2)!=0){   //TX1_2 
                 error();
             }
             else{
@@ -139,12 +138,6 @@ void  LimeFMCW::configLimeChannels(float pFrequency_center_rx, float pFrequency_
         cout << "Enabling RX complete..."<< endl;
 #endif
     }
-    
-    cout << "Setting Lime device sampling rate to -> "<< this->sampling_rate << endl;
-    if(LMS_SetSampleRate(this->lime_device, this->sampling_rate,0)){
-        error();
-    }
-    cout << "Channel configuration is complete." << endl;
 }
 
 uint8_t LimeFMCW::configTestSignal(lms_testsig_t pTestSignalOneType, lms_testsig_t pTestSignalTwoType){
@@ -161,6 +154,14 @@ void LimeFMCW::configSystemStreams(float pThroughputVsLatency, float pF_start, f
     
     // ThroughputVsLatency is a vallue between 0..1
     pThroughputVsLatency = ((pThroughputVsLatency > 1.0)||(pThroughputVsLatency < 0)) ? 0.5 : pThroughputVsLatency;
+
+    // Set the smapling rate of the system
+    this->sampling_rate = (pF_sweep - pF_start);
+    cout << "Setting Lime device sampling rate to -> "<< this->sampling_rate << endl;
+    if(LMS_SetSampleRate(this->lime_device, this->sampling_rate,0)){
+        error();
+    }
+    cout << "Channel configuration is complete." << endl;
 
     // Setup data buffers
 #ifdef USE_LIMEFMCW_CH_TX
