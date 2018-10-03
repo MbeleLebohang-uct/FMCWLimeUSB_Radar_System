@@ -24,7 +24,7 @@ def digitalFMPeeble(f_start, f_end, T):
 		t_n = (n - ((N+1)/2.0))*T_1
 		t.append(t_n)
 
-		phase = 2*pi*t_n*(delta_f + delta_f*(t_n)/(2*T))
+		phase = 2*pi*t_n*(0*delta_f + delta_f*(t_n)/(2*T))
 		y.append(cos(phase))
 
 	return t, y
@@ -37,7 +37,7 @@ def getNames():
 
 def main():
 	t1, chirpSignal = digitalChirp(1, 10, 5, 1000)
-	t2, FMPeeble = digitalFMPeeble(10, 11, 5)
+	t2, FMPeeble = digitalFMPeeble(1, 10, 5)
 
 	plt.subplot(211)
 	plt.plot(t1, chirpSignal)

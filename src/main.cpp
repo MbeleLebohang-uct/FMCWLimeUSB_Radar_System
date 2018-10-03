@@ -29,11 +29,11 @@ using namespace MBLLEB006;
  */
 
 
-float bandwidth = 1e6;
+float bandwidth = 10e6;
 
 //Channel config params
-float center_freq_rx = 500e6;       // 500 MHz
-float center_freq_tx = 500e6;       // 500 MHz
+float center_freq_rx = 2000e6;       // 500 MHz
+float center_freq_tx = 2000e6;       // 500 MHz
 float gain_rx        = 1;           // 1 = max gain = 73 dB
 float gain_tx        = 1;
 double sampling_rate = bandwidth;	// Nyquist theorem for sampling complex signals
@@ -41,7 +41,7 @@ double sampling_rate = bandwidth;	// Nyquist theorem for sampling complex signal
 float throughputVsLatency = 0.5;
 float f_start = 40e6;
 float f_sweep = f_start + bandwidth;
-float t_cpi = 50;
+float t_cpi = 500;
 
 int main(int argc, char** argv){
     cout << "-------Raptor Watch FMCW Radar System-------" << endl;
