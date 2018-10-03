@@ -29,14 +29,14 @@ using namespace MBLLEB006;
  */
 
 
-float bandwidth = 1e6;
+float bandwidth = 50e6;
 
 //Channel config params
 float center_freq_rx = 500e6;       // 500 MHz
 float center_freq_tx = 500e6;       // 500 MHz
 float gain_rx        = 1;           // 1 = max gain = 73 dB
 float gain_tx        = 1;
-double sampling_rate = 1e6;
+double sampling_rate = bandwidth;	// Nyquist theorem for sampling complex signals
 
 float throughputVsLatency = 0.5;
 float f_start = 40e6;
