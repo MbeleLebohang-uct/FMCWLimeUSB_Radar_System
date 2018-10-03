@@ -29,7 +29,7 @@ using namespace MBLLEB006;
  */
 
 
-float bandwidth = 50e6;
+float bandwidth = 1e6;
 
 //Channel config params
 float center_freq_rx = 500e6;       // 500 MHz
