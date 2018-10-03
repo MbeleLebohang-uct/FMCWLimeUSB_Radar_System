@@ -29,7 +29,7 @@
 
 // Define the time(sec) to transmit and receive data
 #define TRANSMISSION_RECEIVE_TIME   60
-#define BUFFER_SIZE   1024*2
+#define BUFFER_SIZE   2048*4
 
 // Uncomment one or both of this micros to use that path
 //#define USE_LIMEFMCW_CH_RX

@@ -141,7 +141,7 @@ void  LimeFMCW::configLimeChannels(float pFrequency_center_rx, float pFrequency_
     }
     
     cout << "Setting Lime device sampling rate to -> "<< this->sampling_rate << endl;
-    if(LMS_SetSampleRate(this->lime_device, this->sampling_rate,2)){
+    if(LMS_SetSampleRate(this->lime_device, this->sampling_rate,0)){
         error();
     }
     cout << "Channel configuration is complete." << endl;
